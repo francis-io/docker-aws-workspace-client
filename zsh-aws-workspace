@@ -1,0 +1,37 @@
+_run-aws-workspace_client() {
+    docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix \
+	--net=host \
+	-v "${HOME}/.aws-workspace-${1}":"/root/.local/share/Amazon Web Services" \
+	-e DISPLAY=${DISPLAY} \
+	-e --env="DISPLAY" \
+	aws-workspaces
+}
+
+aws-workspace() {
+    if ! docker info > /dev/null 2>&1; then
+        echo "This uses docker, and it isn't running - please start docker and try again!"
+        exit 1
+    fi
+
+    if [[ -n "$1" ]]; then
+        mkdir -p "${HOME}"/.aws-workspace-"${1}"  # Create a workspace directory if it doesn't exist
+
+        if [[] "$(uname)" == "Darwin" ]]; then
+            # Do something under Mac OS X platform
+            echo "Not tested on Mac. If you get this working, please create a PR"
+            _run-aws-workspace_client "${1}"
+
+        if [[ "$(expr substr $(uname -s) 1 5)" -eq "Linux" ]]; then
+            _run-aws-workspace_client "${1}"
+
+        elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]]; then
+            # Do something under 32 bits Windows NT platform
+            echo "Not impelemented yet. Please create a PR"
+
+        elif [[ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]]; then
+            echo "Not impelemented yet. Please create a PR"
+        fi
+    else
+        echo "Usage: aws-workspace local-workspace-reference/name. Example: aws-workspace \"client123\""
+    fi
+}
